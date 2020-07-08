@@ -14,16 +14,18 @@ template <typename T>
 CutMagnet<T>::CutMagnet(
     const Body<T>& bodyA, const Vector3<double>& p_AP,
     const Body<T>& bodyB, const Vector3<double>& p_BQ,
-    double scale_factor, double drop_off_rate) :
+    double scale_factor, double drop_off_rate, double turn_off_force_threshold) :
     ForceElement<T>(bodyA.model_instance()),
     bodyA_(bodyA),
     p_AP_(p_AP),
     bodyB_(bodyB),
     p_BQ_(p_BQ),
     scale_factor_(scale_factor),
-    drop_off_rate_(drop_off_rate) {
+    drop_off_rate_(drop_off_rate),
+    turn_off_force_threshold_(turn_off_force_threshold) {
   DRAKE_THROW_UNLESS(scale_factor >= 0);
   DRAKE_THROW_UNLESS(drop_off_rate >= 0);
+  DRAKE_THROW_UNLESS(turn_off_force_threshold >= 0);
 }
 
 template <typename T>
@@ -52,8 +54,14 @@ void CutMagnet<T>::DoCalcAndAddForceContribution(
   // Vector3<T> f_AP_W =
   //     stiffness() * (length_soft - free_length()) * r_PQ_W;
 
-  Vector3<T> f_AP_W = (scale_factor() * (1 / (1 + (drop_off_rate() * length_soft * length_soft)))) * 
-                        r_PQ_W;
+  Vector3<T> f_AP_W;
+
+  if(length_soft > turn_off_force_threshold()){
+    f_AP_W = 0.0 * r_PQ_W;
+  } else {
+    f_AP_W = (scale_factor() * (1 / (1 + (drop_off_rate() * length_soft * length_soft)))) * r_PQ_W;
+  }
+
 
   // // The rate at which the length of the spring changes.
   // const T length_dot = CalcLengthTimeDerivative(pc, vc);
@@ -151,7 +159,7 @@ CutMagnet<T>::TemplatedDoCloneToScalar(
   // Make the CutMagnet<T> clone.
   auto cut_magnet_clone = std::make_unique<CutMagnet<ToScalar>>(
       bodyA_clone, p_AP(), bodyB_clone, p_BQ(),
-      scale_factor(), drop_off_rate());
+      scale_factor(), drop_off_rate(), turn_off_force_threshold());
 
   return cut_magnet_clone;
 }

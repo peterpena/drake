@@ -64,7 +64,7 @@ class CutMagnet : public ForceElement<T> {
   CutMagnet(
       const Body<T>& bodyA, const Vector3<double>& p_AP,
       const Body<T>& bodyB, const Vector3<double>& p_BQ,
-      double scale_factor, double drop_off_rate);
+      double scale_factor, double drop_off_rate, double turn_off_force_threshold);
 
   const Body<T>& bodyA() const { return bodyA_; }
 
@@ -81,6 +81,8 @@ class CutMagnet : public ForceElement<T> {
   double scale_factor() const { return scale_factor_; }
 
   double drop_off_rate() const { return drop_off_rate_; }
+
+  double turn_off_force_threshold() const { return turn_off_force_threshold_; }
 
   T CalcPotentialEnergy(
       const systems::Context<T>& context,
@@ -130,6 +132,7 @@ class CutMagnet : public ForceElement<T> {
   const Vector3<double> p_BQ_;
   double scale_factor_;
   double drop_off_rate_;
+  double turn_off_force_threshold_;
 };
 
 }  // namespace multibody
