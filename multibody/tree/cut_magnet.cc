@@ -61,8 +61,7 @@ void CutMagnet<T>::DoCalcAndAddForceContribution(
   } else {
     f_AP_W = (scale_factor() * (1 / (1 + (drop_off_rate() * length_soft * length_soft)))) * r_PQ_W;
   }
-
-
+  (void)vc;
   // // The rate at which the length of the spring changes.
   // const T length_dot = CalcLengthTimeDerivative(pc, vc);
 
