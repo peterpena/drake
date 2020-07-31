@@ -99,7 +99,11 @@ T CutMagnet<T>::CalcPotentialEnergy(
 
   const T length_soft = sqrt(p_PQ_W.squaredNorm());
 
-  return - scale_factor() * atan(sqrt(drop_off_rate()) * length_soft) / sqrt(drop_off_rate());
+  if(length_soft > turn_off_force_threshold()) {
+    return 0.0;
+  } else {
+    return - scale_factor() * atan(sqrt(drop_off_rate()) * length_soft) / sqrt(drop_off_rate());
+  }
 }
 
 template <typename T>
@@ -127,11 +131,15 @@ T CutMagnet<T>::CalcConservativePower(
   // The rate at which the length of the spring changes.
   const T length_dot = CalcLengthTimeDerivative(pc, vc);
 
-  // Since V = 1/2⋅k⋅(ℓ-ℓ₀)² we have that, from its definition:
-  // Pc = -d(V)/dt = -k⋅(ℓ-ℓ₀)⋅dℓ/dt
-  const T Pc = - scale_factor() * (1 / (1 + (drop_off_rate() * length_soft * length_soft))) * 
-                 length_dot;
-  return Pc;
+  if(length_soft > turn_off_force_threshold()) {
+    return 0.0;
+  } else {
+    // Since V = 1/2⋅k⋅(ℓ-ℓ₀)² we have that, from its definition:
+    // Pc = -d(V)/dt = -k⋅(ℓ-ℓ₀)⋅dℓ/dt
+    const T Pc = - scale_factor() * (1 / (1 + (drop_off_rate() * length_soft * length_soft))) *
+                length_dot;
+    return Pc;
+  }
 }
 
 template <typename T>
